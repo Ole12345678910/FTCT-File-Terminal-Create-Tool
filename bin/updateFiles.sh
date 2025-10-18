@@ -17,7 +17,7 @@ while true; do
 
     case $decide in
         [Uu])
-            action="update"   # lagrer hva som skal gjøres
+            action="update"  
             break
             ;;
         [Aa])

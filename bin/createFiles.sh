@@ -1,17 +1,15 @@
 #!/bin/bash
-
-echo -e "\e[32mScript running\e[0m"
-
+echo
 read -p 'Where do you want to place the file?: ' folderPlace
 
 if [[ ! -d "$folderPlace" ]]; then
     echo -e "\e[31mError: Folder does not exist!\e[0m"
     exit 1
 fi
-
+echo
 
 read -p $'\e[34mWhat is the name of the file?: \e[0m' fileName
-
+echo
 read -p $'\e[34mWhat kind of file type do you want to make?: \e[0m' fileType
 
 #checks if its a number, if not it will not allow
@@ -29,6 +27,8 @@ for ((i=1; i<=fileNumber; i++))
 do
     touch "$folderPlace/$fileName$i.$fileType" 
 done
+
+echo
 
 #asks if yes or no if the user wants to add contents to the file
 
@@ -53,6 +53,7 @@ while true; do
 done
 
 #loading bar
+echo
 
 echo -n "Creating files"
 for i in {1..20}; do
