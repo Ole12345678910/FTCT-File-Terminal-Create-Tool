@@ -1,4 +1,4 @@
-<img width="763" height="417" alt="FTCT-logo" src="https://github.com/user-attachments/assets/02f5920b-d790-4e30-90fa-719c66f5fdcc" />
+<img width="685" height="391" alt="FTCT-logo(1)" src="https://github.com/user-attachments/assets/2a6aa146-05f4-4464-9fa2-25ac2f7d9c18" />
 
 This is a project that uses bash to create files and update it.
 
