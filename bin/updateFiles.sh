@@ -1,56 +1,75 @@
 #!/bin/bash
 
-read -p 'Select witch path you want to update: ' pathSelect
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-#See if path exists
-if [[ ! -d "$pathSelect" ]]; then
-    echo -e "\e[31mError: Folder does not exist!\e[0m"
-    exit 1
-fi
-
-read -p 'Select witch file you want to edit: ' fileEdit
-
-#This gives user an message if they want to update yes or not and invalid if none are selected
+# Loop for updating files
 while true; do
+    # Ask user for the folder path
+    pathSelect=$(dialog --clear --title 'Path' --inputbox 'Select which path you want to update:' 10 50 3>&1 1>&2 2>&3)
+    [ $? -ne 0 ] && exit 0  # Exit if user presses ESC or Cancel
 
-    read -p 'Do you want to update the file or add to it [u/a]?: ' decide
+    
+
+    # Check if the folder exists
+    if [[ ! -d "$pathSelect" ]]; then
+        dialog --title 'Error' --msgbox 'Folder does not exist!' 10 50
+        continue
+    fi
+
+    # Ask user for the file to edit
+    fileEdit=$(dialog --clear --title 'File' --inputbox 'Select which file you want to edit:' 10 50 3>&1 1>&2 2>&3)
+    [ $? -ne 0 ] && exit 0
+
+    # Check if the file exists
+    if [[ ! -f "$pathSelect/$fileEdit" ]]; then
+        dialog --title 'Error' --msgbox 'File does not exist!' 10 50
+        continue
+    fi
+
+    # Ask user whether to update or add to the file
+    decide=$(dialog --clear --title 'Decide' --menu 'Choose an option:' 10 50 2 \
+    U "Update file" \
+    A "Add to file" 3>&1 1>&2 2>&3)
 
     case $decide in
-        [Uu])
-            action="update"  
-            break
+        U)
+            # Get new content to overwrite the file
+            fileAction=$(dialog --title 'Update' --inputbox 'Enter new content for the file:' 10 50 3>&1 1>&2 2>&3)
+            echo "$fileAction" > "$pathSelect/$fileEdit"
+            {
+            for i in $(seq 0 5 100); do
+                sleep 0.1  # simulate work
+                echo $i
+            done
+            } | dialog --title "Updating" --gauge "Please wait..." 10 50 0
+            dialog --title 'Done' --msgbox 'File updated successfully!' 10 50
             ;;
-        [Aa])
-            action="add"
-            break
+        A)
+            # Get content to append to the file
+            fileAction=$(dialog --title 'Add' --inputbox 'Enter content to append:' 10 50 3>&1 1>&2 2>&3)
+            echo "$fileAction" >> "$pathSelect/$fileEdit"
+            {
+            for i in $(seq 0 5 100); do
+                sleep 0.1  # simulate work
+                echo $i
+            done
+            } | dialog --title "Updating" --gauge "Please wait..." 10 50 0
+            dialog --title 'Done' --msgbox 'Content added successfully!' 10 50
             ;;
         *)
-            echo "Incorrect choice"
+            dialog --title 'Error' --msgbox 'Incorrect choice' 10 50
             ;;
     esac
+
+    # Ask user what to do next
+    cont=$(dialog --title 'Next' --menu 'What do you want to do?' 10 50 3 \
+    Y 'Update more files' \
+    M 'Return to Main Menu' \
+    N 'Exit' 3>&1 1>&2 2>&3)
+
+    case $cont in
+        Y) continue ;;  # Go back to the top of the loop to update more files
+        M) exit 0 ;;    # Return control to mainFTCT.sh menu
+        N) clear; exit 0 ;; # Exit the script
+    esac
 done
-
-#checks if the action(users input) is either update or add
-#and it also checks if the file exits
-
-if [[ "$action" == "update" ]]; then
-    if [[ -f "$pathSelect/$fileEdit" ]]; then
-        read -p 'What do you want to update to the file ?: ' fileAction
-        echo "$fileAction" > "$pathSelect/$fileEdit"
-    else
-        echo 'file does not exist or the name is wrong'
-    fi
-
-elif [[ "$action" == "add" ]]; then
-    if [[ -f "$pathSelect/$fileEdit" ]]; then
-        read -p 'What do you want to add to the file ?: ' fileAction
-        echo "$fileAction" >> "$pathSelect/$fileEdit"
-    else
-        echo 'file does not exist or the name is wrong'
-    fi
-fi
-
-echo "Successfully $action the file '$fileEdit'"
-
-
-

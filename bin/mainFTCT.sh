@@ -1,45 +1,54 @@
-#!/bin/bash\r
+#!/bin/bash
 
-# Find scripts in onw path
+#Sett script-path
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Makes the scripts runable
-chmod +x "$SCRIPT_DIR/createFiles.sh" "$SCRIPT_DIR/updateFiles.sh" "$SCRIPT_DIR/mainFTCT.sh"
+welcome_function() {
+    clear
+    ascii_logo=$(cat <<'EOF'
+ /$$$$$$$$ /$$$$$$$$ /$$$$$$  /$$$$$$$$
+| $$_____/|__  $$__//$$__  $$|__  $$__/
+| $$         | $$  | $$  \__/   | $$   
+| $$$$$      | $$  | $$         | $$   
+| $$__/      | $$  | $$         | $$   
+| $$         | $$  | $$    $$   | $$   
+| $$         | $$  |  $$$$$$/   | $$   
+|__/         |__/   \______/    |__/  
+EOF
+)
 
-echo -e '\e[32m
-    ________________________
-   / ____/_  __/ ____/_  __/
-  / /_    / / / /     / /   
- / __/   / / / /___  / /    
-/_/     /_/  \____/ /_/     
-                            \e[0m'
-echo -e "Welcome to FTCT File Terminal Create Tool!"
-echo
-echo -e "\e[32m1) Make files\e[0m"
-echo -e "\e[33m2) Update Files\e[0m"
-echo -e "\e[31m3) Quit\e[0m"
-echo
+    # Logo animation
+    clear
+    while IFS= read -r line; do
+        echo -e "\e[32m$line\e[0m"
+        sleep 0.05
+    done <<< "$ascii_logo"
 
-read -p "Pick a number: " choice
+    echo
+    echo -e "\e[32mWelcome to FTCT - File Terminal Create Tool!\e[0m"
+    sleep 1.5
 
-while true; do
 
-    read -p "Pick a number: " choice
+    # Welcome message in dialog
+    dialog --title "FTCT" --msgbox "Welcome to File Terminal Create Tool!\n\nUse this interface to create, update, and manage your files with ease." 12 60
+    
+}
 
-    case $choice in
-        1)
-            "$SCRIPT_DIR/createFiles.sh"
-            ;;
-        2)
-            "$SCRIPT_DIR/updateFiles.sh"
-            ;;
-        3)
-            echo -e "\e[31mStopped...\e[0m"
-            break  
-            ;;
-        *)
-            echo -e "\e[31mIncorrect choice!\e[0m"
-            ;;
-    esac
-done
+# Main menu loop
+main_menu() {
+    while true; do
+        CHOICE=$(dialog --title "Main Menu" --menu "Select:" 15 50 4 \
+        1 "Create Files" \
+        2 "Update Files" \
+        3 "Exit" \
+        3>&1 1>&2 2>&3)
 
+        case $CHOICE in
+            1) "$SCRIPT_DIR/createFiles.sh" ;;
+            2) "$SCRIPT_DIR/updateFiles.sh" ;;
+            3) clear; exit 0 ;;
+        esac
+    done
+}
+welcome_function
+main_menu

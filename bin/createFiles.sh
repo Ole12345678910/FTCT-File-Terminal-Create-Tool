@@ -1,76 +1,77 @@
 #!/bin/bash
-echo
-read -p 'Where do you want to place the file?: ' folderPlace
 
-if [[ ! -d "$folderPlace" ]]; then
-    echo -e "\e[31mError: Folder does not exist!\e[0m"
-    exit 1
-fi
-echo
-
-read -p $'\e[34mWhat is the name of the file?: \e[0m' fileName
-echo
-read -p $'\e[34mWhat kind of file type do you want to make?: \e[0m' fileType
-
-#checks if its a number, if not it will not allow
-
+#Main loop
 while true; do
-    read -p $'\e[34mEnter number of files: \e[0m' fileNumber
-    if [[ "$fileNumber" =~ ^[0-9]+$ ]]; then
-        break
-    else
-        echo -e "\e[31mPlease enter a valid number!\e[0m"
+
+    #Ask for folder path
+    folderPlace=$(dialog --clear --title 'Select path' --inputbox 'Where do you want to place the file?:' 10 50 3>&1 1>&2 2>&3)
+
+    if [[ ! -d "$folderPlace" ]]; then
+        dialog --msgbox "Error: Folder does not exist!" 10 50
+        continue  # Go back to start instead of exiting
     fi
-done
 
-for ((i=1; i<=fileNumber; i++))
-do
-    touch "$folderPlace/$fileName$i.$fileType" 
-done
+    #Ask for file name
+    fileName=$(dialog --clear --title 'Name the file' --inputbox 'What is the name of the file?: ' 10 50 3>&1 1>&2 2>&3)
 
-echo
+    #Ask for file type
+    fileType=$(dialog --clear --title 'Name the file type' --inputbox 'What kind of file type do you want to make?: ' 10 50 3>&1 1>&2 2>&3)
 
-#asks if yes or no if the user wants to add contents to the file
+    #Ask for how many files to create (must be number)
+    while true; do
+        fileNumber=$(dialog --clear --title 'Number of files' --inputbox 'Enter number of files: ' 10 50 3>&1 1>&2 2>&3)
+        if [[ "$fileNumber" =~ ^[0-9]+$ ]]; then
+            break
+        else
+            dialog --clear --title 'Error' --msgbox 'Please enter a valid number!' 10 50 
+        fi
+    done
 
-while true; do
-    read -p $'\e[33mDo you wish to add content to the files [y/n] ? \e[0m' yn
+    #Create the files
+    for ((i=1; i<=fileNumber; i++)); do
+        touch "$folderPlace/$fileName$i.$fileType"
+    done
+
+    #Ask if user wants to add content
+    yn=$(dialog --clear --title 'Add content to files?' --menu 'Do you wish to add content to the files [y/n] ?' 10 50 3 \
+        Y 'Add content to files' \
+        N 'No, don’t add content' \
+        3>&1 1>&2 2>&3)
 
     case $yn in
-        [Yy]* )
-            read -p "Write the contents that should be in the files: " fileContent
+        Y)
+            fileContent=$(dialog --clear --title 'Write the content' --inputbox 'Write the contents that should be in the files: ' 10 50 3>&1 1>&2 2>&3)
             for ((i=1; i<=fileNumber; i++)); do
                 echo "$fileContent" > "$folderPlace/$fileName$i.$fileType"
             done
-            break
             ;;
-        [Nn]* )
-            exit
-            ;;
-        * )
-            echo -e "\e[32mPlease answer yes or no.\e[0m"
+        N)
             ;;
     esac
+
+    #Loading bar (visual feedback)
+    {
+    for i in $(seq 0 5 100); do
+        sleep 0.1
+        echo $i
+    done
+    } | dialog --title "Updating" --gauge "Please wait..." 10 50 0
+
+    dialog --title 'Done' --msgbox 'Files created successfully!' 10 50
+
+    #Ask if user wants to create more, return, or exit
+    continue=$(dialog --clear --title 'Create more files?' --menu 'Would you like to create more files? [y/n/main] ? ' 15 50 4 \
+        Y 'Create more files' \
+        M 'Return to Main Menu' \
+        N 'Exit' 3>&1 1>&2 2>&3)
+
+    case $continue in
+        Y) clear; continue ;;  # Start loop again (create more)
+        M) clear; exit 0 ;;    # Return to main menu (mainFTCT.sh)
+        N) clear; exit 0 ;;    # Exit the script completely
+    esac
+
 done
 
-#loading bar
-echo
 
-echo -n "Creating files"
-for i in {1..20}; do
-    sleep 0.1   # simulerer arbeid
-    echo -n "."
-done
-echo " Done!"
-
-#touch myFile.txt
-
-#echo "te" > myFile.txt
-#echo "test number 2" >> myFile.txt
-
-#read -p "message: " msg
-
-#read -p "Delay (sec): " sec
-#sleep "$sec"
-
-#echo -e "\e[1;33m🔔 Reminder: $msg\e[0m"
 
