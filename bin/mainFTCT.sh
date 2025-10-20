@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash\r
 
 # Find scripts in onw path
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,18 +22,24 @@ echo
 
 read -p "Pick a number: " choice
 
-case $choice in
-    1)
-        "$SCRIPT_DIR/createFiles.sh"
-        ;;
-    2)
-        "$SCRIPT_DIR/updateFiles.sh"
-        ;;
-    3)
-        echo -e "\e[31mStopped...\e[0m"
-        exit 0
-        ;;
-    *)
-        echo -e "\e[31mIncorrect choice!\e[0m"
-        ;;
-esac
+while true; do
+
+    read -p "Pick a number: " choice
+
+    case $choice in
+        1)
+            "$SCRIPT_DIR/createFiles.sh"
+            ;;
+        2)
+            "$SCRIPT_DIR/updateFiles.sh"
+            ;;
+        3)
+            echo -e "\e[31mStopped...\e[0m"
+            break  
+            ;;
+        *)
+            echo -e "\e[31mIncorrect choice!\e[0m"
+            ;;
+    esac
+done
+
